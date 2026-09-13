@@ -1,0 +1,13 @@
+{
+  "name": "Farm Khata",
+  "short_name": "Farm Khata",
+  "description": "Track farm expenses, yield, and profit per crop",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FAF6ED",
+  "theme_color": "#1B4332",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

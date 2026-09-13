@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1B4332">
+<title>Farm Khata</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<style>
+:root{
+  --green-dark:#1B4332;
+  --green:#2D6A4F;
+  --green-light:#74C69D;
+  --soil:#7C5832;
+  --soil-light:#A9764C;
+  --cream:#FAF6ED;
+  --card:#FFFFFF;
+  --ink:#2B2118;
+  --ink-soft:#6B5D4F;
+  --line:#E6DDC8;
+  --profit:#2D6A4F;
+  --loss:#B3261E;
+  --loss-bg:#FBE9E7;
+  --profit-bg:#E8F3EC;
+  --radius:16px;
+  --radius-sm:10px;
+  --shadow:0 2px 8px rgba(43,33,24,0.08);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Noto Sans','Noto Sans Kannada',-apple-system,Roboto,Arial,sans-serif;
+  background:var(--cream);
+  color:var(--ink);
+  -webkit-tap-highlight-color:transparent;
+  overscroll-behavior-y:none;
+  min-height:100vh;
+}
+button{font-family:inherit;}
+.app{
+  max-width:480px;
+  margin:0 auto;
+  min-height:100vh;
+  background:var(--cream);
+  position:relative;
+  padding-bottom:84px;
+}
+
+/* Top bar */
+.topbar{
+  background:var(--green-dark);
+  color:#fff;
+  padding:18px 16px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:20;
+}
+.topbar .title-block{display:flex;align-items:center;gap:10px;}
+.topbar .back-btn{
+  background:rgba(255,255,255,0.15);
+  border:none;
+  color:#fff;
+  width:38px;height:38px;
+  border-radius:50%;
+  font-size:20px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.topbar h1{font-size:19px;margin:0;font-weight:700;}
+.lang-toggle{
+  background:rgba(255,255,255,0.18);
+  border:1px solid rgba(255,255,255,0.4);
+  color:#fff;
+  border-radius:20px;
+  padding:6px 12px;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* Screens */
+.screen{display:none;padding:16px;animation:fadein .15s ease;}
+.screen.active{display:block;}
+@keyframes fadein{from{opacity:0;}to{opacity:1;}}
+
+/* Cards */
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:12px;
+  box-shadow:var(--shadow);
+  border:1px solid var(--line);
+}
+.crop-card{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  cursor:pointer;
+  padding:14px 16px;
+}
+.crop-emoji{
+  font-size:30px;
+  width:52px;height:52px;
+  background:var(--cream);
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.crop-info{flex:1;min-width:0;}
+.crop-name{font-size:17px;font-weight:700;margin:0 0 2px;}
+.crop-sub{font-size:13px;color:var(--ink-soft);margin:0;}
+.crop-pl{
+  text-align:right;
+  flex-shrink:0;
+}
+.crop-pl .amt{font-size:16px;font-weight:800;}
+.crop-pl .lbl{font-size:11px;color:var(--ink-soft);}
+.profit-text{color:var(--profit);}
+.loss-text{color:var(--loss);}
+
+/* Big summary card on home */
+.summary-card{
+  background:linear-gradient(135deg,var(--green-dark),var(--green));
+  color:#fff;
+  border-radius:var(--radius);
+  padding:20px;
+  margin-bottom:16px;
+}
+.summary-card .top-label{font-size:13px;opacity:0.85;margin:0 0 4px;font-weight:600;letter-spacing:0.3px;}
+.summary-card .top-amt{font-size:32px;font-weight:800;margin:0 0 14px;}
+.summary-row{display:flex;justify-content:space-between;font-size:13px;opacity:0.92;border-top:1px solid rgba(255,255,255,0.25);padding-top:10px;}
+.summary-row div{text-align:center;flex:1;}
+.summary-row .v{font-size:16px;font-weight:700;display:block;margin-top:2px;}
+
+/* FAB */
+.fab{
+  position:fixed;
+  bottom:90px;
+  right:50%;
+  transform:translateX(195px);
+  width:58px;height:58px;
+  border-radius:50%;
+  background:var(--soil);
+  color:#fff;
+  border:none;
+  font-size:28px;
+  box-shadow:0 4px 14px rgba(124,88,50,0.45);
+  cursor:pointer;
+  z-index:25;
+  display:flex;align-items:center;justify-content:center;
+}
+@media (max-width:480px){
+  .fab{right:20px;transform:none;}
+}
+
+/* Bottom nav */
+.bottomnav{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  max-width:480px;
+  margin:0 auto;
+  background:#fff;
+  border-top:1px solid var(--line);
+  display:flex;
+  z-index:20;
+}
+.bottomnav button{
+  flex:1;
+  background:none;border:none;
+  padding:10px 4px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--ink-soft);
+  font-size:11px;
+  cursor:pointer;
+  font-weight:600;
+}
+.bottomnav button.active{color:var(--green-dark);}
+.bottomnav .icon{font-size:20px;}
+
+/* Forms */
+.field{margin-bottom:16px;}
+.field label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  color:var(--ink-soft);
+  margin-bottom:6px;
+}
+.field input,.field select{
+  width:100%;
+  padding:13px 14px;
+  border-radius:var(--radius-sm);
+  border:1.5px solid var(--line);
+  font-size:16px;
+  background:#fff;
+  color:var(--ink);
+  font-family:inherit;
+}
+.field input:focus,.field select:focus{
+  outline:none;
+  border-color:var(--green);
+}
+.field-row{display:flex;gap:10px;}
+.field-row .field{flex:1;}
+
+.btn{
+  display:block;
+  width:100%;
+  padding:15px;
+  border-radius:var(--radius-sm);
+  border:none;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  text-align:center;
+}
+.btn-primary{background:var(--green-dark);color:#fff;}
+.btn-secondary{background:#fff;color:var(--green-dark);border:1.5px solid var(--green-dark);}
+.btn-danger{background:var(--loss-bg);color:var(--loss);}
+.btn-soil{background:var(--soil);color:#fff;}
+.btn-sm{padding:10px 16px;font-size:14px;width:auto;display:inline-block;}
+
+.section-title{
+  font-size:14px;
+  font-weight:800;
+  color:var(--soil);
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  margin:22px 0 10px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.add-link{
+  color:var(--green-dark);
+  font-weight:700;
+  font-size:14px;
+  background:var(--profit-bg);
+  border:none;
+  border-radius:20px;
+  padding:6px 14px;
+  cursor:pointer;
+}
+
+.line-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius-sm);
+  padding:12px 14px;
+  margin-bottom:8px;
+}
+.line-item .li-main{font-size:14px;font-weight:700;}
+.line-item .li-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+.line-item .li-amt{font-weight:800;font-size:15px;color:var(--ink);}
+.line-item .li-del{
+  background:none;border:none;color:var(--loss);font-size:18px;cursor:pointer;padding:4px 8px;
+}
+
+.empty-state{
+  text-align:center;
+  padding:50px 20px;
+  color:var(--ink-soft);
+}
+.empty-state .e-icon{font-size:48px;margin-bottom:10px;display:block;}
+.empty-state .e-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.empty-state .e-sub{font-size:13px;}
+
+/* Modal/sheet */
+.sheet-overlay{
+  position:fixed;inset:0;
+  background:rgba(27,67,50,0.4);
+  z-index:50;
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+}
+.sheet-overlay.active{display:flex;}
+.sheet{
+  background:var(--cream);
+  width:100%;
+  max-width:480px;
+  border-radius:20px 20px 0 0;
+  max-height:88vh;
+  overflow-y:auto;
+  padding:18px 16px 24px;
+  animation:slideup .2s ease;
+}
+@keyframes slideup{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.sheet-handle{
+  width:40px;height:4px;background:var(--line);border-radius:4px;margin:0 auto 14px;
+}
+.sheet h2{font-size:18px;margin:0 0 16px;}
+
+/* PL detail breakdown */
+.pl-breakdown-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:11px 0;
+  border-bottom:1px solid var(--line);
+  font-size:14px;
+}
+.pl-breakdown-row:last-child{border-bottom:none;}
+.pl-breakdown-row .pbr-label{display:flex;align-items:center;gap:8px;color:var(--ink-soft);font-weight:600;}
+.pl-breakdown-row .pbr-amt{font-weight:700;}
+
+.big-pl-card{
+  border-radius:var(--radius);
+  padding:22px;
+  text-align:center;
+  margin-bottom:16px;
+}
+.big-pl-card.profit{background:var(--profit-bg);}
+.big-pl-card.loss{background:var(--loss-bg);}
+.big-pl-card .pl-lbl{font-size:14px;font-weight:700;margin-bottom:4px;}
+.big-pl-card .pl-amt{font-size:36px;font-weight:800;}
+.big-pl-card.profit .pl-lbl,.big-pl-card.profit .pl-amt{color:var(--profit);}
+.big-pl-card.loss .pl-lbl,.big-pl-card.loss .pl-amt{color:var(--loss);}
+
+.tabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;}
+.tab-btn{
+  background:#fff;border:1.5px solid var(--line);
+  border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;
+  color:var(--ink-soft);cursor:pointer;white-space:nowrap;
+}
+.tab-btn.active{background:var(--green-dark);color:#fff;border-color:var(--green-dark);}
+
+.toast{
+  position:fixed;
+  bottom:100px;left:50%;
+  transform:translateX(-50%);
+  background:var(--ink);
+  color:#fff;
+  padding:11px 22px;
+  border-radius:30px;
+  font-size:14px;
+  z-index:100;
+  opacity:0;
+  transition:opacity .25s;
+  pointer-events:none;
+}
+.toast.show{opacity:1;}
+
+.crop-emoji-picker{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+.emoji-opt{
+  width:44px;height:44px;font-size:22px;
+  border-radius:10px;border:2px solid var(--line);background:#fff;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.emoji-opt.selected{border-color:var(--green-dark);background:var(--profit-bg);}
+
+.helper-text{font-size:12px;color:var(--ink-soft);margin-top:-2px;margin-bottom:14px;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="title-block">
+      <button class="back-btn" id="backBtn" style="display:none;" onclick="goBack()">←</button>
+      <h1 id="topbarTitle" data-i18n="app_name">Farm Khata</h1>
+    </div>
+    <button class="lang-toggle" onclick="toggleLang()" id="langBtn">ಕನ್ನಡ</button>
+  </div>
+
+  <!-- HOME SCREEN -->
+  <div class="screen active" id="screen-home">
+    <div class="summary-card" id="seasonSummaryCard"></div>
+    <div id="cropList"></div>
+  </div>
+
+  <!-- CROP DETAIL SCREEN -->
+  <div class="screen" id="screen-crop">
+    <div id="cropDetailContent"></div>
+  </div>
+
+  <!-- ADD/EDIT EXPENSE LIST SCREEN (generic, reused for ferti/seed/labour/pesticide/harvest/equip/sale) -->
+  <div class="screen" id="screen-category">
+    <div id="categoryContent"></div>
+  </div>
+
+  <!-- SETTINGS / ALL CROPS REPORT -->
+  <div class="screen" id="screen-report">
+    <div id="reportContent"></div>
+  </div>
+
+  <!-- FAB (only on home) -->
+  <button class="fab" id="fabBtn" onclick="openAddCropSheet()">+</button>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottomnav">
+    <button class="nav-btn active" data-screen="home" onclick="navTo('home')">
+      <span class="icon">🏠</span><span data-i18n="nav_home">Home</span>
+    </button>
+    <button class="nav-btn" data-screen="report" onclick="navTo('report')">
+      <span class="icon">📊</span><span data-i18n="nav_report">Report</span>
+    </button>
+  </div>
+
+  <!-- SHEET OVERLAY for add crop / add line item -->
+  <div class="sheet-overlay" id="sheetOverlay" onclick="closeSheetIfBackdrop(event)">
+    <div class="sheet" id="sheetContent" onclick="event.stopPropagation()"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
